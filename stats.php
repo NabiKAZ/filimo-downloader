@@ -105,19 +105,20 @@ Refresh:
 <table border='1' id="myTable">
     <thead>
     <tr style='font-weight:bold;'>
-        <th onclick="sortTable(0)">file name</th>
-        <th onclick="sortTable(1)">video id</th>
-        <th onclick="sortTable(2)">title</th>
-        <th onclick="sortTable(3)">rate(x/5)</th>
-        <th onclick="sortTable(4)">duration(min)</th>
-        <th onclick="sortTable(5)">quality</th>
-        <th onclick="sortTable(6)">bandwidth</th>
-        <th onclick="sortTable(7)">resolution</th>
-        <th onclick="sortTable(8)">current file size</th>
-        <th onclick="sortTable(9)">last speed</th>
-        <th onclick="sortTable(10)">progress</th>
-        <th onclick="sortTable(11)">progress bar</th>
-        <th onclick="sortTable(12)">last modified date</th>
+		<th onclick="sortTable(0)">cover</th>
+        <th onclick="sortTable(1)">file name</th>
+        <th onclick="sortTable(2)">video id</th>
+        <th onclick="sortTable(3)">title</th>
+        <th onclick="sortTable(4)">rate(x/5)</th>
+        <th onclick="sortTable(5)">duration(min)</th>
+        <th onclick="sortTable(6)">quality</th>
+        <th onclick="sortTable(7)">bandwidth</th>
+        <th onclick="sortTable(8)">resolution</th>
+        <th onclick="sortTable(9)">current file size</th>
+        <th onclick="sortTable(10)">last speed</th>
+        <th onclick="sortTable(11)">progress</th>
+        <th onclick="sortTable(12)">progress bar</th>
+        <th onclick="sortTable(13)">last modified date</th>
     </tr>
     </thead>
     <?php
@@ -135,6 +136,7 @@ Refresh:
         $filename_log = $dirname . DIRECTORY_SEPARATOR . $filename . '.log';
         $filename_video = $dirname . DIRECTORY_SEPARATOR . $filename . '.mp4';
         $filename_info = $dirname . DIRECTORY_SEPARATOR . $filename . '.info';
+		$filename_cover = $dirname . DIRECTORY_SEPARATOR . $filename . '.jpg';
 
         $modified_date = date('Y-m-d H:i:s', filemtime($filename_log));
         if (is_file($filename_video)) {
@@ -143,6 +145,7 @@ Refresh:
             $filesize = 0;
         }
 
+		echo "<td><a href='$filename_cover' target='_blank'><img src='$filename_cover' width='70'></a></td>\n";
         echo "<td><a href='$filename_video'>$filename.mp4</a></td>\n";
 
         $content = @file_get_contents($filename_info);

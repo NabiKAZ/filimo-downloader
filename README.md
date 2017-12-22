@@ -37,7 +37,7 @@ php download.php
 ![filimo_run](https://user-images.githubusercontent.com/246721/34075293-34be415a-e2d7-11e7-8baf-ffa55d97877a.png)
 
 # گزارشگیری دانلود
-دستور `php -S localhost:8000 stats.php` را وارد کنید. سپس در مرورگر خود، آدرس `http://localhost:8000` را باز کنید. بدین صورت می‌توانید گزارش و مشخصات همه‌ی فیلم‌های دانلود شده و میزان درصد دانلود آنها را مشاهده کنید.
+دستور `php -S localhost:8000` را وارد کنید. سپس در مرورگر خود، آدرس `http://localhost:8000/stats.php` را باز کنید. بدین صورت می‌توانید گزارش و مشخصات همه‌ی فیلم‌های دانلود شده و میزان درصد دانلود آنها را مشاهده کنید.
 
 ![filimo_stats](https://user-images.githubusercontent.com/246721/34075299-599c7ffa-e2d7-11e7-854a-620c1f03f1ce.png)
 

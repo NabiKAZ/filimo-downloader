@@ -61,6 +61,9 @@ preg_match('/rateit-current-rate-.*">(.*?)<\/i>/', $contents, $match);
 $rate = $match[1];
 echo "Rate: $rate / 5\n";
 
+preg_match('/<span class="cover " >\n.*<img src="(.*?)"/', $contents, $match);
+$cover = $match[1];
+
 echo "===========================================================\n";
 
 $contents = get_contents('https://www.filimo.com/w/' . $video_id);
@@ -100,6 +103,7 @@ if (isset($proxy) && $proxy) {
 $cmd = 'ffmpeg ' . $cmd_proxy . ' -i "' . $qualities[$input]['url'] . '" -y "' . $video_file . '"';
 $log_file = $base_path . $file_name . '.log';
 $info_file = $base_path . $file_name . '.info';
+$cover_file = $base_path . $file_name . '.jpg';
 
 $info = array();
 $info['video_id'] = $video_id;
@@ -111,6 +115,8 @@ $info['bandwidth'] = $qualities[$input]['bandwidth'];
 $info['resolution'] = $qualities[$input]['resolution'];
 $info = json_encode($info);
 file_put_contents($info_file, $info);
+
+file_put_contents($cover_file, file_get_contents($cover));
 
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     pclose(popen('start /B ' . $cmd . '<nul >nul 2>"' . $log_file . '"', 'r'));
