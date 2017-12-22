@@ -119,6 +119,8 @@ Refresh:
         <th onclick="sortTable(11)">progress</th>
         <th onclick="sortTable(12)">progress bar</th>
         <th onclick="sortTable(13)">last modified date</th>
+		<th onclick="sortTable(14)">info</th>
+		<th onclick="sortTable(15)">log</th>
     </tr>
     </thead>
     <?php
@@ -146,7 +148,7 @@ Refresh:
         }
 
 		echo "<td><a href='$filename_cover' target='_blank'><img src='$filename_cover' width='70'></a></td>\n";
-        echo "<td><a href='$filename_video'>$filename.mp4</a></td>\n";
+        echo "<td><a href='$filename_video' target='_blank'>$filename.mp4</a></td>\n";
 
         $content = @file_get_contents($filename_info);
         $info = json_decode($content);
@@ -205,6 +207,8 @@ Refresh:
         echo "<td><div style='width:100px;height: 20px;border: 1px solid #0095ff;'><div style='width:$progress%; background-color: #0095ff;height: 20px;'></div></div></td>\n";
 
         echo "<td>$modified_date</td>\n";
+		echo "<td><a href='$filename_info' target='_blank'>info</a></td>\n";
+		echo "<td><a href='$filename_log' target='_blank'>log</a></td>\n";
 
 
         echo "</tr>\n";
