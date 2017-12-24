@@ -116,7 +116,7 @@ $info['resolution'] = $qualities[$input]['resolution'];
 $info = json_encode($info);
 file_put_contents($info_file, $info);
 
-file_put_contents($cover_file, file_get_contents($cover));
+file_put_contents($cover_file, get_contents($cover));
 
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     pclose(popen('start /B ' . $cmd . '<nul >nul 2>"' . $log_file . '"', 'r'));
