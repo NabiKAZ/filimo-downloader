@@ -12,14 +12,17 @@
 
 # نیازمندی‌ها
 * [تهیه اشتراک فیلیمو](http://filimo.com/invite/NabiKAZ/a8ca)
-* [نصب برنامه PHP (حداقل نسخه 5.4)](http://php.net)
+* [برنامه PHP (حداقل نسخه 5.4)](http://php.net)
+* [برنامه FFmpeg](http://ffmpeg.org)
 * خط فرمان ویندوز یا لینوکس
 
 # راهنمای استفاده
 * ابتدا از طریق این لینک در فیلیمو ثبت نام کنید و حق اشتراک مورد نیاز خود را خریداری نمائید:
 [http://filimo.com/invite/NabiKAZ/a8ca](http://filimo.com/invite/NabiKAZ/a8ca)
 
-* سپس از نصب [PHP](http://php.net/) و نسخه‌ی نصب شده بر روی سیستم خود توسط دستور `php -v` اطمینان حاصل کنید.
+* از نصب [PHP](http://php.net/) و نسخه‌ی نصب شده بر روی سیستم خود توسط دستور `php -v` اطمینان حاصل کنید.
+
+* از نصب [FFmpeg](http://ffmpeg.org) بر روی سیستم خود توسط دستور `ffmpeg` اطمینان حاصل کنید.
 
 * سورس برنامه را [دانلود](https://github.com/NabiKAZ/filimo-downloader/archive/master.zip) کنید.
 
