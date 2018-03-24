@@ -46,7 +46,7 @@ echo "Input Video ID: ";
 $video_id = trim(fgets(STDIN));
 
 $contents = get_contents('https://www.filimo.com/m/' . $video_id);
-preg_match('/"title_movie">\n.*>(.*?)<\/span>/', $contents, $match);
+preg_match('/"title_movie">\r\n.*>(.*?)<\/span>/', $contents, $match);
 if (!isset($match[1])) {
     die("\nSorry! Not found any video with this ID.\n");
 }
