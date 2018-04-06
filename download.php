@@ -66,9 +66,15 @@ $cover = $match[1];
 
 echo "===========================================================\n";
 
-$contents = get_contents('https://www.filimo.com/w/' . $video_id);
-preg_match('/{file: "([^{]*?)\?dim=" \+ width \+ "," \+ height, type:"video\/mp4"}/', $contents, $match);
+$contents_watch = get_contents('https://www.filimo.com/w/' . $video_id);
 
+$subtitle = null;
+preg_match('/{file\: \"(.*?\/subtitle\/.*?)\",/', $contents_watch, $match_subtitle);
+if (isset($match_subtitle[1])) {
+    $subtitle = $match_subtitle[1];
+}
+
+preg_match('/{file: "([^{]*?)\?dim=" \+ width \+ "," \+ height, type:"video\/mp4"}/', $contents_watch, $match);
 $contents = get_contents($match[1]);
 preg_match_all('/#((?:[0-9])+(?:p|k)+)\n(?:.*)BANDWIDTH=(.*),RESOLUTION=(.*)\n(.*)/', $contents, $matches);
 
@@ -104,6 +110,7 @@ $cmd = 'ffmpeg ' . $cmd_proxy . ' -i "' . $qualities[$input]['url'] . '" -y "' .
 $log_file = $base_path . $file_name . '.log';
 $info_file = $base_path . $file_name . '.info';
 $cover_file = $base_path . $file_name . '.jpg';
+$subtitle_file = $base_path . $file_name . '.srt';
 
 $info = array();
 $info['video_id'] = $video_id;
@@ -117,6 +124,10 @@ $info = json_encode($info);
 file_put_contents($info_file, $info);
 
 file_put_contents($cover_file, get_contents($cover));
+
+if ($subtitle) {
+    file_put_contents($subtitle_file, get_contents($subtitle));
+}
 
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
     pclose(popen('start /B ' . $cmd . '<nul >nul 2>"' . $log_file . '"', 'r'));
