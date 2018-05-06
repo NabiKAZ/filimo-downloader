@@ -123,10 +123,12 @@ $info['resolution'] = $qualities[$input]['resolution'];
 $info = json_encode($info);
 file_put_contents($info_file, $info);
 
-file_put_contents($cover_file, get_contents($cover));
+if ($cover) {
+	file_put_contents($cover_file, get_contents($cover));
+}
 
 if ($subtitle) {
-    file_put_contents($subtitle_file, get_contents($subtitle));
+    file_put_contents($subtitle_file, normalize_subtitle(get_contents($subtitle)));
 }
 
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
@@ -137,6 +139,8 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 
 echo "===========================================================\n";
 echo "Video file: $video_file\n";
+echo "Cover file: " . ($cover ? $cover_file : 'N/A') . "\n";
+echo "Subtitle file: " . ($subtitle ? $subtitle_file : 'N/A') . "\n";
 echo "Log file: $log_file\n";
 echo "Info file: $info_file\n";
 echo "Start downloading in the background...\n";
@@ -181,4 +185,10 @@ function multisort($mdarray, $mdkey, $sort = SORT_ASC)
     }
     array_multisort($dates, $sort, $mdarray);
     return $mdarray;
+}
+
+function normalize_subtitle($sub)
+{
+	$sub = str_replace("WEBVTT\r\n", '', $sub);
+	return $sub;
 }

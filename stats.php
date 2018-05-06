@@ -105,26 +105,28 @@ Refresh:
 <table border='1' id="myTable">
     <thead>
     <tr style='font-weight:bold;'>
-		<th onclick="sortTable(0)">cover</th>
-        <th onclick="sortTable(1)">file name</th>
-        <th onclick="sortTable(2)">video id</th>
-        <th onclick="sortTable(3)">title</th>
-        <th onclick="sortTable(4)">rate(x/5)</th>
-        <th onclick="sortTable(5)">duration(min)</th>
-        <th onclick="sortTable(6)">quality</th>
-        <th onclick="sortTable(7)">bandwidth</th>
-        <th onclick="sortTable(8)">resolution</th>
-        <th onclick="sortTable(9)">current file size</th>
-        <th onclick="sortTable(10)">last speed</th>
-        <th onclick="sortTable(11)">progress</th>
-        <th onclick="sortTable(12)">progress bar</th>
-        <th onclick="sortTable(13)">last modified date</th>
-		<th onclick="sortTable(14)">info</th>
-		<th onclick="sortTable(15)">log</th>
+		<?php $sort_index = -1; ?>
+		<th onclick="sortTable(<?php echo ++$sort_index; ?>)">cover</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">file name</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">video id</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">title</th>
+		<th onclick="sortTable(<?php echo ++$sort_index; ?>)">subtitle</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">rate(x/5)</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">duration(min)</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">quality</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">bandwidth</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">resolution</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">current file size</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">last speed</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">progress</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">progress bar</th>
+        <th onclick="sortTable(<?php echo ++$sort_index; ?>)">last modified date</th>
+		<th onclick="sortTable(<?php echo ++$sort_index; ?>)">info</th>
+		<th onclick="sortTable(<?php echo ++$sort_index; ?>)">log</th>
     </tr>
     </thead>
     <?php
-    error_reporting(E_ALL & ~E_NOTICE);
+    error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
     date_default_timezone_set('Asia/Tehran');
     $base_path = 'download/';
     $files = array_filter(glob($base_path . '*.log', GLOB_BRACE), 'is_file');
@@ -139,6 +141,7 @@ Refresh:
         $filename_video = $dirname . DIRECTORY_SEPARATOR . $filename . '.mp4';
         $filename_info = $dirname . DIRECTORY_SEPARATOR . $filename . '.info';
 		$filename_cover = $dirname . DIRECTORY_SEPARATOR . $filename . '.jpg';
+		$filename_subtitle = $dirname . DIRECTORY_SEPARATOR . $filename . '.srt';
 
         $modified_date = date('Y-m-d H:i:s', filemtime($filename_log));
         if (is_file($filename_video)) {
@@ -155,6 +158,7 @@ Refresh:
 
         echo "<td>{$info->video_id}</td>\n";
         echo "<td style='direction:rtl;'><a href='http://www.filimo.com/m/{$info->video_id}' target='_blank'>{$info->title}</a></td>\n";
+		echo "<td>" . (file_exists($filename_subtitle) ? "<a href='$filename_subtitle' target='_blank'>download</a>" : "") . "</td>\n";
         echo "<td>{$info->rate}</td>\n";
         echo "<td>{$info->duration}</td>\n";
         echo "<td>{$info->quality}</td>\n";
