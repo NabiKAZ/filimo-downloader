@@ -61,7 +61,7 @@ preg_match('/rateit-current-rate-.*">(.*?)<\/i>/', $contents, $match);
 $rate = $match[1];
 echo "Rate: $rate / 5\n";
 
-preg_match('/<span class="cover " >\n.*<img src="(.*?)"/', $contents, $match);
+preg_match('/<span class="cover " >\r\n.*<img src="(.*?)"/', $contents, $match);
 $cover = $match[1];
 
 echo "===========================================================\n";
