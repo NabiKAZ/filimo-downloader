@@ -130,7 +130,10 @@ Refresh:
     date_default_timezone_set('Asia/Tehran');
     $base_path = 'download/';
     $files = array_filter(glob($base_path . '*.log', GLOB_BRACE), 'is_file');
-    usort($files, create_function('$a,$b', 'return filemtime($b) - filemtime($a);'));
+    usort($files, function($a,$b){
+        return filemtime($b) - filemtime($a);
+    });
+    //usort($files, create_function('$a,$b', 'return filemtime($b) - filemtime($a);'));
     foreach ($files as $file) {
         echo "<tr>\n";
 
