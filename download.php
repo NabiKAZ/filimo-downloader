@@ -70,14 +70,18 @@ echo "===========================================================\n";
 
 $contents_watch = get_contents('https://www.filimo.com/w/' . $video_id);
 
-$subtitle = null;
-preg_match('/{file\: \"(.*?\/subtitle\/.*?)\",/', $contents_watch, $match_subtitle);
-if (isset($match_subtitle[1])) {
-    $subtitle = $match_subtitle[1];
+preg_match('/JSON\.parse\(\'(.*?)\'\);/', $contents_watch, $match);
+$match = end($match);
+$match = json_decode($match);
+
+$subtitle = @$match->tracks[0]->src;
+$video_url = @$match->plugins->sabaPlayerPlugin->multiSRC[1][0]->src;
+
+if (!$video_url) {
+	echo "Error: Can not fetch video URL.\n";
 }
 
-preg_match('/{file: "([^{]*?)\?dim=" \+ width \+ "," \+ height, type:"video\/mp4"}/', $contents_watch, $match);
-$contents = get_contents($match[1]);
+$contents = get_contents($video_url);
 preg_match_all('/#((?:[0-9])+(?:p|k)+)\n(?:.*)BANDWIDTH=(.*),RESOLUTION=(.*)\n(.*)/', $contents, $matches);
 
 $qualities = array();
