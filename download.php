@@ -60,7 +60,7 @@ $duration = $match[1];
 echo "Duration: $duration min\n";
 
 preg_match('/rateit-current-rate-.*?">(.*?)<\/i>/', $contents, $match);
-$rate = $match[1];
+$rate = @$match[1];
 echo "Rate: $rate / 5\n";
 
 preg_match('/<span class="cover " >.*?<img src="(.*?)"/', $contents, $match);
@@ -75,7 +75,13 @@ $match = end($match);
 $match = json_decode($match);
 
 $subtitle = @$match->tracks[0]->src;
-$video_url = @$match->plugins->sabaPlayerPlugin->multiSRC[1][0]->src;
+
+foreach (@$match->plugins->sabaPlayerPlugin->multiSRC as $objecturl) {
+	if ($objecturl[0]->type == 'application/vnd.apple.mpegurl') {
+		$video_url = $objecturl[0]->src;
+		break;
+	}
+}
 
 if (!$video_url) {
 	echo "Error: Can not fetch video URL.\n";
