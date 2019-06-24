@@ -1,5 +1,5 @@
 <?php
-echo "Filimo Downloader - version 0.1.0 - Copyright 2017\n";
+echo "Filimo Downloader - version 0.1.0 - Copyright 2017-2019\n";
 echo "By Nabi KaramAliZadeh <www.nabi.ir> <nabikaz@gmail.com>\n";
 echo "Signup here: http://filimo.com/invite/NabiKAZ/a8ca\n";
 echo "Project link: https://github.com/NabiKAZ/filimo-downloader\n";
@@ -11,34 +11,114 @@ $proxy = '';
 
 login:
 @mkdir($config_path);
+
+//check logged in user
 $contents = get_contents('https://www.filimo.com/');
-preg_match('/username: \'(.*?)\',/', $contents, $match);
-if ($match[1] != '0') {
+preg_match('/username.*= \'(.*?)\';/', $contents, $match);
+
+//you already logged in
+if (isset($match[1]) && $match[1] != '') {
     echo "Your username: $match[1]\n";
 } else {
-    echo "> Login to filimo.com\n";
+	
+	//login and get token
+	echo "> Login to filimo.com\n";
+	$contents = get_contents('https://www.filimo.com/_/login');
+	preg_match('/guid: "(.*?)",/', $contents, $match);
+	if (!isset($match[1])) {
+		die("Error: Expire auth token.\n");
+	}
+	$guid = $match[1];
+	
+	//auth and get temp id
+	$post_data = array('guid' => $guid);
+	$contents = get_contents('https://www.filimo.com/_/api/fa/v1/user/Authenticate/auth', $post_data);
+	$contents = json_decode($contents);
+	$temp_id = $contents->data->attributes->temp_id;
+	
+	//get username
     echo "Input username: ";
     $username = trim(fgets(STDIN));
-    $contents = get_contents('https://www.filimo.com/etc/api/signinstep1/usernamemo/' . $username . '/devicetype/desktop');
-    $response = json_decode($contents);
-    if ($response->signinstep1->type != 'success') {
-        die("Error: " . $response->signinstep1->value . "\n");
-    } else {
-        $tempid = @$response->signinstep1->tempid;
-        echo "Input password: ";
-        $password = trim(fgets(STDIN));
-        echo "Logging...\n";
-        $contents = get_contents('https://www.filimo.com/etc/api/signinstep2/usernamemo/' . $username . '/codepass/' . $password . '/tempid/' . $tempid . '/usernamemotype/username/');
-        $response = json_decode($contents);
-        if ($response->signinstep2->type != 'success') {
-            die("Error: " . $response->signinstep2->value . "\n");
-        } else {
-            echo "Logged In.\n";
-            echo "IMPORTANT: Your private cookies is stored in the '$config_path' directory, Be careful about its security!\n";
-            echo "===========================================================\n";
-            goto login;
-        }
+	
+	//send username
+	$post_data = array(
+		'account' => $username,
+		'guid' => $guid,
+		'temp_id' => $temp_id,
+	);
+	$contents = get_contents('https://www.filimo.com/_/api/fa/v1/user/Authenticate/signin_step1', $post_data);
+	$contents = json_decode($contents);
+	if (isset($contents->errors[0]->detail)) {
+		die("Error: " . $contents->errors[0]->detail . "\n");
     }
+	$temp_id = $contents->data->attributes->temp_id;
+	
+	//get password
+	echo "Input password: ";
+	$password = trim(fgets(STDIN));
+	echo "Logging...\n";
+	
+	//post username and password
+	$post_data = array(
+		'account' => $username,
+		'code' => $password,
+		'codepass_type' => 'pass',
+		'guid' => $guid,
+		'temp_id' => $temp_id,
+	);
+	$contents = get_contents('https://www.filimo.com/_/api/fa/v1/user/Authenticate/signin_step2', $post_data);
+	$contents = json_decode($contents);
+	
+	//error handle for login with sms
+	if (isset($contents->errors[0]->detail) && $contents->errors[0]->detail = 'شما مجاز به ورود با رمز نمی باشید لطفا با شماره موبایل خود وارد شوید') {
+		
+		//post username and get mobile
+		$post_data = array(
+			'account' => $username,
+			'codepass_type' => 'otp',
+			'guid' => $guid,
+			'temp_id' => $temp_id,
+		);
+		$contents = get_contents('https://www.filimo.com/_/api/fa/v1/user/Authenticate/signin_step1', $post_data);
+		$contents = json_decode($contents);
+		if (isset($contents->errors[0]->detail)) {
+			die("Error: " . $contents->errors[0]->detail . "\n");
+		}
+		$temp_id = $contents->data->attributes->temp_id;
+		$mobile = $contents->data->attributes->mobile_valid;
+		
+		//get sms code
+		echo "Input SMS code sent to $mobile: ";
+		$code = trim(fgets(STDIN));
+		echo "Logging...\n";
+		
+		//post sms code
+		$post_data = array(
+			'account' => $username,
+			'code' => $code,
+			'codepass_type' => 'otp',
+			'guid' => $guid,
+			'temp_id' => $temp_id,
+		);
+		$contents = get_contents('https://www.filimo.com/_/api/fa/v1/user/Authenticate/signin_step2', $post_data);
+		$contents = json_decode($contents);
+		if (isset($contents->errors[0]->detail)) {
+			die("Error: " . $contents->errors[0]->detail . "\n");
+		}
+	
+	//general errors handling of login
+	} elseif (isset($contents->errors[0]->detail)) {
+		die("Error: " . $contents->errors[0]->detail . "\n");
+	}
+	
+	//logged in
+	echo "\n";
+	echo "Logged In.\n";
+	echo "IMPORTANT: Your private cookies is stored in the '$config_path' directory, Be careful about its security!\n";
+	echo "===========================================================\n";
+	
+	//try again and check login
+	goto login;
 }
 echo "===========================================================\n";
 
@@ -48,7 +128,7 @@ $video_id = trim(fgets(STDIN));
 $contents = get_contents('https://www.filimo.com/m/' . $video_id);
 $contents = str_replace(array("\r\n", "\n\r", "\r", "\n"), '', $contents);
 
-preg_match('/"title_movie">.*?>(.*?)<\/span>/', $contents, $match);
+preg_match('/movie.nameFa.*?= \'(.*?)\';/', $contents, $match);
 if (!isset($match[1])) {
     die("\nSorry! Not found any video with this ID.\n");
 }
@@ -61,7 +141,7 @@ echo "Duration: $duration min\n";
 
 preg_match('/rateit-current-rate-.*?">(.*?)<\/i>/', $contents, $match);
 $rate = @$match[1];
-echo "Rate: $rate / 5\n";
+if ($rate) echo "Rate: $rate / 5\n";
 
 preg_match('/<span class="cover " >.*?<img src="(.*?)"/', $contents, $match);
 $cover = $match[1];
@@ -76,7 +156,7 @@ $match = json_decode($match);
 
 $subtitle = @$match->tracks[0]->src;
 
-foreach (@$match->plugins->sabaPlayerPlugin->multiSRC as $objecturl) {
+foreach (@$match->multiSRC as $objecturl) {
 	if ($objecturl[0]->type == 'application/vnd.apple.mpegurl') {
 		$video_url = $objecturl[0]->src;
 		break;
@@ -84,7 +164,7 @@ foreach (@$match->plugins->sabaPlayerPlugin->multiSRC as $objecturl) {
 }
 
 if (!$video_url) {
-	echo "Error: Can not fetch video URL.\n";
+	die("Error: Can not fetch video URL.\n");
 }
 
 $contents = get_contents($video_url);
@@ -161,7 +241,7 @@ echo "For stop process, kill it.\n";
 echo "Bye!\n";
 
 
-function get_contents($url)
+function get_contents($url, $data = null)
 {
     global $config_path;
     $ch = curl_init();
@@ -186,6 +266,10 @@ function get_contents($url)
         'Upgrade-Insecure-Requests:1',
         'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36',
     ));
+    if ($data !== null) {
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    }
     return curl_exec($ch);
 }
 
