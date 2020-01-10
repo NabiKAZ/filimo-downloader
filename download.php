@@ -128,29 +128,29 @@ $video_id = trim(fgets(STDIN));
 $contents = get_contents('https://www.filimo.com/m/' . $video_id);
 $contents = str_replace(array("\r\n", "\n\r", "\r", "\n"), '', $contents);
 
-preg_match('/movie.nameFa.*?= \'(.*?)\';/', $contents, $match);
+preg_match('/movie\.nameFa.*?= "(.*?)";/', $contents, $match);
 if (!isset($match[1])) {
     die("\nSorry! Not found any video with this ID.\n");
 }
 $title = $match[1];
 echo "Title: $title\n";
 
-preg_match('/"movie-time">.*?([0-9]+).*?<\/div>/', $contents, $match);
-$duration = $match[1];
+preg_match('/movie\.totalDuration.*?= "(.*?)";/', $contents, $match);
+$duration = round($match[1] / 60);
 echo "Duration: $duration min\n";
 
-preg_match('/rateit-current-rate-.*?">(.*?)<\/i>/', $contents, $match);
+preg_match('/movie\.filimoRate.*?= "(.*?)";/', $contents, $match);
 $rate = @$match[1];
-if ($rate) echo "Rate: $rate / 5\n";
+if ($rate) echo "Rate: $rate%\n";
 
-preg_match('/<span class="cover " >.*?<img src="(.*?)"/', $contents, $match);
+preg_match('/movie\.poster.*?= "(.*?)";/', $contents, $match);
 $cover = $match[1];
 
 echo "===========================================================\n";
 
 $contents_watch = get_contents('https://www.filimo.com/w/' . $video_id);
 
-preg_match('/JSON\.parse\(\'(.*?)\'\);/', $contents_watch, $match);
+preg_match('/var player_data = (.*?);/', $contents_watch, $match);
 $match = end($match);
 $match = json_decode($match);
 
