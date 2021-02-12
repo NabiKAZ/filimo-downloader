@@ -150,7 +150,7 @@ echo "===========================================================\n";
 
 $contents_watch = get_contents('https://www.filimo.com/w/' . $video_id);
 
-preg_match('/var player_data = (.*?);/', $contents_watch, $match);
+preg_match('/var player_data = (.*?);\n/', $contents_watch, $match);
 $match = end($match);
 $match = json_decode($match);
 
