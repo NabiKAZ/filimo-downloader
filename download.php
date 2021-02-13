@@ -190,6 +190,20 @@ foreach ($qualities as $key => $value) {
 echo "Input option number: ";
 $input = trim(fgets(STDIN));
 
+$cmd_audio = '';
+preg_match_all('/#EXT-X-MEDIA:TYPE=AUDIO.*?LANGUAGE="(.*?)".*?URI="(.*?)"/', $contents, $audios, PREG_SET_ORDER, 0);
+if ($audios) {
+	echo "Select Audio:\n";
+	foreach ($audios as $key => $value) {
+		echo $key+1 . ") LANGUAGE = " . $value[1] . "\n";
+	}
+	echo "Input option number: ";
+	$a_input = trim(fgets(STDIN));
+	$audio_key = $audios[$a_input-1][1];
+	$audio_url = $audios[$a_input-1][2];
+	$cmd_audio = ' -i "' . $audio_url . '" -map 0:v:0 -map 1:a:0';
+}
+
 @mkdir($base_path);
 $file_name = $video_id . '_' . $qualities[$input]['quality'];
 $video_file = $base_path . $file_name . '.mp4';
@@ -198,7 +212,7 @@ if (isset($proxy) && $proxy) {
 } else {
     $cmd_proxy = '';
 }
-$cmd = 'ffmpeg ' . $cmd_proxy . ' -i "' . $qualities[$input]['url'] . '" -c:v copy -c:a copy -bsf:a aac_adtstoasc -y "' . $video_file . '"';
+$cmd = 'ffmpeg ' . $cmd_proxy . ' -i "' . $qualities[$input]['url'] . '"' . $cmd_audio . ' -c:v copy -c:a copy -bsf:a aac_adtstoasc -y "' . $video_file . '"';
 $log_file = $base_path . $file_name . '.log';
 $info_file = $base_path . $file_name . '.info';
 $cover_file = $base_path . $file_name . '.jpg';
