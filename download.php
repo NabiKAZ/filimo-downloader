@@ -14,7 +14,7 @@ login:
 
 //check logged in user
 $contents = get_contents('https://www.filimo.com/');
-preg_match('/username.*= \'(.*?)\';/', $contents, $match);
+preg_match('/username.*?=.*?\'(.*?)\';/', $contents, $match);
 
 //you already logged in
 if (isset($match[1]) && $match[1] != '') {
@@ -23,8 +23,8 @@ if (isset($match[1]) && $match[1] != '') {
 	
 	//login and get token
 	echo "> Login to filimo.com\n";
-	$contents = get_contents('https://www.filimo.com/_/login');
-	preg_match('/guid: "(.*?)",/', $contents, $match);
+	$contents = get_contents('https://www.filimo.com/signin');
+	preg_match('/guid:"(.*?)",/', $contents, $match);
 	if (!isset($match[1])) {
 		die("Error: Expire auth token.\n");
 	}
@@ -128,29 +128,29 @@ $video_id = trim(fgets(STDIN));
 $contents = get_contents('https://www.filimo.com/m/' . $video_id);
 $contents = str_replace(array("\r\n", "\n\r", "\r", "\n"), '', $contents);
 
-preg_match('/movie\.nameFa.*?= "(.*?)";/', $contents, $match);
+preg_match('/movie\.nameFa.*?=.*?"(.*?)";/', $contents, $match);
 if (!isset($match[1])) {
     die("\nSorry! Not found any video with this ID.\n");
 }
 $title = $match[1];
 echo "Title: $title\n";
 
-preg_match('/movie\.totalDuration.*?= "(.*?)";/', $contents, $match);
+preg_match('/movie\.totalDuration.*?=.*?"(.*?)";/', $contents, $match);
 $duration = round($match[1] / 60);
 echo "Duration: $duration min\n";
 
-preg_match('/movie\.filimoRate.*?= "(.*?)";/', $contents, $match);
+preg_match('/movie\.filimoRate.*?=.*?"(.*?)";/', $contents, $match);
 $rate = @$match[1];
 if ($rate) echo "Rate: $rate%\n";
 
-preg_match('/movie\.poster.*?= "(.*?)";/', $contents, $match);
+preg_match('/movie\.poster.*?=.*?"(.*?)";/', $contents, $match);
 $cover = $match[1];
 
 echo "===========================================================\n";
 
 $contents_watch = get_contents('https://www.filimo.com/w/' . $video_id);
 
-preg_match('/var player_data = (.*?);\n/', $contents_watch, $match);
+preg_match('/var player_data.*?=(.*?);if\(/', $contents_watch, $match);
 $match = end($match);
 $match = json_decode($match);
 
