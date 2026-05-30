@@ -1,5 +1,5 @@
 <?php
-echo "Filimo Downloader - version 0.1.0 - Copyright 2017-2019\n";
+echo "Filimo Downloader - version 1.0.0 - Copyright 2017-2019\n";
 echo "By Nabi KaramAliZadeh <www.nabi.ir> <nabikaz@gmail.com>\n";
 echo "Signup here: http://filimo.com/invite/NabiKAZ/a8ca\n";
 echo "Project link: https://github.com/NabiKAZ/filimo-downloader\n";
