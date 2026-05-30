@@ -2,3 +2,6 @@
 /.idea
 /config
 /download
+/.history
+/.vscode
+/docs
