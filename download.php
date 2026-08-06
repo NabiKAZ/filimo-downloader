@@ -279,9 +279,16 @@ $cover = isset($attr->poster) ? $attr->poster : '';
 echo "===========================================================\n";
 
 //subtitle and video URL come from the same watch API response
-$subtitle = '';
+$subtitles = array();
 if (isset($attr->tracks) && is_array($attr->tracks) && count($attr->tracks) > 0) {
-	$subtitle = $attr->tracks[0]->src;
+	foreach ($attr->tracks as $track) {
+		if (!isset($track->src) || $track->src == '') {
+			continue;
+		}
+		$srclang = isset($track->srclang) && $track->srclang != '' ? $track->srclang : '';
+		$label = isset($track->label) && $track->label != '' ? $track->label : '';
+		$subtitles[] = array('src' => $track->src, 'srclang' => $srclang, 'label' => $label);
+	}
 }
 
 //multiSRC is now an object: { value: [ { src, type } ], Count: N }
@@ -359,7 +366,13 @@ $cmd = 'ffmpeg ' . $cmd_proxy . ' -i "' . $qualities[$input]['url'] . '"' . $cmd
 $log_file = $base_path . $file_name . '.log';
 $info_file = $base_path . $file_name . '.info';
 $cover_file = $base_path . $file_name . '.jpg';
-$subtitle_file = $base_path . $file_name . '.srt';
+
+//build one output path per subtitle track (suffix with language/index to keep them unique)
+$subtitle_files = array();
+foreach ($subtitles as $i => $sub) {
+	$suffix = $sub['srclang'] !== '' ? preg_replace('/[^A-Za-z0-9_\-]/', '_', $sub['srclang']) : ($i + 1);
+	$subtitle_files[] = $base_path . $file_name . '.' . $suffix . '.srt';
+}
 
 $info = array();
 $info['video_id'] = $video_id;
@@ -376,8 +389,8 @@ if ($cover) {
 	file_put_contents($cover_file, get_contents($cover));
 }
 
-if ($subtitle) {
-    file_put_contents($subtitle_file, normalize_subtitle(get_contents($subtitle)));
+foreach ($subtitles as $i => $sub) {
+    file_put_contents($subtitle_files[$i], normalize_subtitle(get_contents($sub['src'])));
 }
 
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
@@ -389,7 +402,14 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 echo "===========================================================\n";
 echo "Video file: $video_file\n";
 echo "Cover file: " . ($cover ? $cover_file : 'N/A') . "\n";
-echo "Subtitle file: " . ($subtitle ? $subtitle_file : 'N/A') . "\n";
+if (count($subtitle_files) > 0) {
+    foreach ($subtitle_files as $i => $sf) {
+        $lbl = $subtitles[$i]['label'] !== '' ? $subtitles[$i]['label'] : ($subtitles[$i]['srclang'] !== '' ? $subtitles[$i]['srclang'] : ($i + 1));
+        echo "Subtitle file [$lbl]: $sf\n";
+    }
+} else {
+    echo "Subtitle file: N/A\n";
+}
 echo "Log file: $log_file\n";
 echo "Info file: $info_file\n";
 echo "===========================================================\n";
