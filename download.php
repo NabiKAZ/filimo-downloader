@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/subtitle_utils.php';
+
 echo "Filimo Downloader - version 2.0.0 - Copyright 2017-2026\n";
 echo "By Nabi KaramAliZadeh <www.nabi.ir> <nabikaz60@gmail.com>\n";
 echo "Signup here: http://filimo.com/invite/NabiKAZ/a8ca\n";
@@ -279,10 +281,7 @@ $cover = isset($attr->poster) ? $attr->poster : '';
 echo "===========================================================\n";
 
 //subtitle and video URL come from the same watch API response
-$subtitle = '';
-if (isset($attr->tracks) && is_array($attr->tracks) && count($attr->tracks) > 0) {
-	$subtitle = $attr->tracks[0]->src;
-}
+$subtitle_tracks = get_subtitle_tracks(isset($attr->tracks) ? $attr->tracks : null);
 
 //multiSRC is now an object: { value: [ { src, type } ], Count: N }
 $video_url = '';
@@ -359,7 +358,6 @@ $cmd = 'ffmpeg ' . $cmd_proxy . ' -i "' . $qualities[$input]['url'] . '"' . $cmd
 $log_file = $base_path . $file_name . '.log';
 $info_file = $base_path . $file_name . '.info';
 $cover_file = $base_path . $file_name . '.jpg';
-$subtitle_file = $base_path . $file_name . '.srt';
 
 $info = array();
 $info['video_id'] = $video_id;
@@ -376,8 +374,13 @@ if ($cover) {
 	file_put_contents($cover_file, get_contents($cover));
 }
 
-if ($subtitle) {
-    file_put_contents($subtitle_file, normalize_subtitle(get_contents($subtitle)));
+$subtitle_files = array();
+if ($subtitle_tracks) {
+	foreach ($subtitle_tracks as $subtitle_index => $subtitle_track) {
+		$subtitle_file = build_subtitle_file_path($base_path, $file_name, $subtitle_track, $subtitle_index, count($subtitle_tracks));
+		file_put_contents($subtitle_file, normalize_subtitle(get_contents($subtitle_track['src'])));
+		$subtitle_files[] = $subtitle_file;
+	}
 }
 
 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
@@ -389,7 +392,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 echo "===========================================================\n";
 echo "Video file: $video_file\n";
 echo "Cover file: " . ($cover ? $cover_file : 'N/A') . "\n";
-echo "Subtitle file: " . ($subtitle ? $subtitle_file : 'N/A') . "\n";
+echo "Subtitle file(s): " . ($subtitle_files ? implode(', ', $subtitle_files) : 'N/A') . "\n";
 echo "Log file: $log_file\n";
 echo "Info file: $info_file\n";
 echo "===========================================================\n";
@@ -730,10 +733,4 @@ function multisort($mdarray, $mdkey, $sort = SORT_ASC)
     }
     array_multisort($dates, $sort, $mdarray);
     return $mdarray;
-}
-
-function normalize_subtitle($sub)
-{
-	$sub = str_replace("WEBVTT\r\n", '', $sub);
-	return $sub;
 }

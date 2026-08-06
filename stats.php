@@ -144,7 +144,8 @@ Refresh:
         $filename_video = $dirname . DIRECTORY_SEPARATOR . $filename . '.mp4';
         $filename_info = $dirname . DIRECTORY_SEPARATOR . $filename . '.info';
 		$filename_cover = $dirname . DIRECTORY_SEPARATOR . $filename . '.jpg';
-		$filename_subtitle = $dirname . DIRECTORY_SEPARATOR . $filename . '.srt';
+		$subtitle_files = array_filter(glob($dirname . DIRECTORY_SEPARATOR . $filename . '*.srt', GLOB_BRACE), 'is_file');
+		natsort($subtitle_files);
 
         $modified_date = date('Y-m-d H:i:s', filemtime($filename_log));
         if (is_file($filename_video)) {
@@ -161,7 +162,17 @@ Refresh:
 
         echo "<td>{$info->video_id}</td>\n";
         echo "<td style='direction:rtl;'><a href='http://www.filimo.com/m/{$info->video_id}' target='_blank'>{$info->title}</a></td>\n";
-		echo "<td>" . (file_exists($filename_subtitle) ? "<a href='$filename_subtitle' target='_blank'>download</a>" : "") . "</td>\n";
+		if (!empty($subtitle_files)) {
+			$subtitle_links = array();
+			foreach ($subtitle_files as $subtitle_file) {
+				$link_text = count($subtitle_files) > 1 ? pathinfo($subtitle_file, PATHINFO_BASENAME) : 'download';
+				$safe_link_text = htmlspecialchars($link_text, ENT_QUOTES, 'UTF-8');
+				$subtitle_links[] = "<a href='$subtitle_file' target='_blank'>$safe_link_text</a>";
+			}
+			echo "<td>" . implode(' | ', $subtitle_links) . "</td>\n";
+		} else {
+			echo "<td></td>\n";
+		}
         echo "<td>{$info->rate}</td>\n";
         echo "<td>{$info->duration}</td>\n";
         echo "<td>{$info->quality}</td>\n";
